@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Aira WhatsApp Bot</title>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@300;400;600&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0a0f0d;
+      --surface: #111a14;
+      --border: #1e3024;
+      --green: #25D366;
+      --green-dim: #1a9e4a;
+      --green-glow: rgba(37,211,102,0.12);
+      --text: #e8f5ea;
+      --muted: #6b8f72;
+      --code-bg: #0d1710;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Inter', sans-serif;
+      font-size: 16px;
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+
+    /* Grid background */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(37,211,102,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(37,211,102,0.03) 1px, transparent 1px);
+      background-size: 40px 40px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .container {
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 0 24px;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* NAV */
+    nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 20px 24px;
+      border-bottom: 1px solid var(--border);
+      position: relative;
+      z-index: 1;
+    }
+
+    .nav-logo {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 14px;
+      color: var(--green);
+      letter-spacing: 0.05em;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 24px;
+      list-style: none;
+    }
+
+    .nav-links a {
+      font-size: 13px;
+      color: var(--muted);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    .nav-links a:hover { color: var(--green); }
+
+    /* HERO */
+    .hero {
+      padding: 80px 0 60px;
+      text-align: center;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--green-glow);
+      border: 1px solid var(--green-dim);
+      border-radius: 20px;
+      padding: 6px 16px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      color: var(--green);
+      margin-bottom: 32px;
+    }
+
+    .badge-dot {
+      width: 7px;
+      height: 7px;
+      background: var(--green);
+      border-radius: 50%;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(0.8); }
+    }
+
+    h1 {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: clamp(32px, 6vw, 56px);
+      font-weight: 700;
+      line-height: 1.1;
+      letter-spacing: -0.02em;
+      margin-bottom: 20px;
+    }
+
+    h1 span {
+      color: var(--green);
+      text-shadow: 0 0 40px rgba(37,211,102,0.4);
+    }
+
+    .hero-sub {
+      font-size: 17px;
+      color: var(--muted);
+      max-width: 520px;
+      margin: 0 auto 40px;
+      font-weight: 300;
+    }
+
+    .hero-actions {
+      display: flex;
+      gap: 14px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .btn-primary {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--green);
+      color: #0a0f0d;
+      font-weight: 600;
+      font-size: 14px;
+      padding: 12px 24px;
+      border-radius: 8px;
+      text-decoration: none;
+      transition: all 0.2s;
+    }
+
+    .btn-primary:hover {
+      background: #1fba58;
+      transform: translateY(-1px);
+      box-shadow: 0 8px 24px rgba(37,211,102,0.25);
+    }
+
+    .btn-ghost {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: transparent;
+      color: var(--text);
+      font-size: 14px;
+      padding: 12px 24px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      text-decoration: none;
+      transition: all 0.2s;
+    }
+
+    .btn-ghost:hover {
+      border-color: var(--green-dim);
+      color: var(--green);
+    }
+
+    /* TERMINAL BLOCK */
+    .terminal {
+      margin: 60px auto;
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      max-width: 700px;
+    }
+
+    .terminal-bar {
+      background: var(--surface);
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .dot { width: 10px; height: 10px; border-radius: 50%; }
+    .dot-r { background: #ff5f57; }
+    .dot-y { background: #febc2e; }
+    .dot-g { background: #28c840; }
+
+    .terminal-title {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      color: var(--muted);
+      margin-left: 8px;
+    }
+
+    .terminal-body {
+      padding: 24px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      line-height: 2;
+    }
+
+    .t-comment { color: #4a6e52; }
+    .t-cmd { color: var(--text); }
+    .t-green { color: var(--green); }
+    .t-yellow { color: #f0c060; }
+    .t-prompt { color: var(--green); margin-right: 8px; }
+
+    /* FEATURES */
+    .section-label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      color: var(--green);
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      text-align: center;
+      margin-bottom: 12px;
+    }
+
+    .section-title {
+      font-size: 28px;
+      font-weight: 600;
+      text-align: center;
+      margin-bottom: 48px;
+    }
+
+    .features {
+      padding: 60px 0;
+    }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 16px;
+    }
+
+    .feature-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 24px;
+      transition: border-color 0.2s, transform 0.2s;
+    }
+
+    .feature-card:hover {
+      border-color: var(--green-dim);
+      transform: translateY(-2px);
+    }
+
+    .feature-icon {
+      font-size: 24px;
+      margin-bottom: 14px;
+    }
+
+    .feature-card h3 {
+      font-size: 15px;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+
+    .feature-card p {
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    /* STACK */
+    .stack {
+      padding: 60px 0;
+      border-top: 1px solid var(--border);
+    }
+
+    .stack-pills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: center;
+      margin-top: 32px;
+    }
+
+    .pill {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 8px 16px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      color: var(--muted);
+      transition: all 0.2s;
+    }
+
+    .pill:hover {
+      border-color: var(--green-dim);
+      color: var(--green);
+    }
+
+    /* FOOTER */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 32px 24px;
+      text-align: center;
+      position: relative;
+      z-index: 1;
+    }
+
+    footer p {
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    footer a {
+      color: var(--green);
+      text-decoration: none;
+    }
+
+    .author-line {
+      margin-top: 8px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      color: #3a5a42;
+    }
+
+    @media (max-width: 600px) {
+      nav { flex-direction: column; gap: 14px; }
+      .hero { padding: 48px 0 40px; }
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-logo">~/aira-bot</div>
+  <ul class="nav-links">
+    <li><a href="#features">Features</a></li>
+    <li><a href="#stack">Stack</a></li>
+    <li><a href="https://github.com/blindrusheroffical-wq/business-bot-whatsapp-">GitHub</a></li>
+  </ul>
+</nav>
+
+<div class="container">
+
+  <section class="hero">
+    <div class="badge">
+      <span class="badge-dot"></span>
+      Open Source · Node.js · JavaScript
+    </div>
+
+    <h1>WhatsApp<br/><span>Business Bot</span></h1>
+
+    <p class="hero-sub">
+      A logic-driven WhatsApp automation bot built with Node.js —
+      smart replies, business workflows, and real conversations on autopilot.
+    </p>
+
+    <div class="hero-actions">
+      <a href="https://github.com/blindrusheroffical-wq/business-bot-whatsapp" class="btn-primary">
+        ↗ View on GitHub
+      </a>
+      <a href="https://github.com/blindrusheroffical-wq/business-bot-whatsapp#readme" class="btn-ghost">
+        📄 Read Docs
+      </a>
+    </div>
+  </section>
+
+  <!-- Terminal -->
+  <div class="terminal">
+    <div class="terminal-bar">
+      <span class="dot dot-r"></span>
+      <span class="dot dot-y"></span>
+      <span class="dot dot-g"></span>
+      <span class="terminal-title">bash — aira-whatsapp-bot</span>
+    </div>
+    <div class="terminal-body">
+      <div><span class="t-comment"># Clone the repo</span></div>
+      <div><span class="t-prompt">$</span><span class="t-cmd">git clone https://github.com/blindrusheroffical-wq/business-bot-whatsapp</span></div>
+      <div><span class="t-prompt">$</span><span class="t-cmd">cd business-bot-whatsapp</span></div>
+      <div><span class="t-prompt">$</span><span class="t-cmd">npm install</span></div>
+      <div>&nbsp;</div>
+      <div><span class="t-comment"># Start the bot</span></div>
+      <div><span class="t-prompt">$</span><span class="t-cmd">node index.js</span></div>
+      <div>&nbsp;</div>
+      <div><span class="t-green">✔ WhatsApp bot connected successfully</span></div>
+      <div><span class="t-yellow">⚡ Listening for messages...</span></div>
+    </div>
+  </div>
+
+  <!-- Features -->
+  <section class="features" id="features">
+    <div class="section-label">What it does</div>
+    <div class="section-title">Built for real business use</div>
+
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon">🤖</div>
+        <h3>Auto Replies</h3>
+        <p>Instantly respond to customer messages with smart, rule-based automation logic.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">⚡</div>
+        <h3>Node.js Powered</h3>
+        <p>Built on Node.js for fast, non-blocking performance even under high message load.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🔓</div>
+        <h3>Open Source</h3>
+        <p>Fully open source. Fork it, extend it, make it your own for any business need.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🧩</div>
+        <h3>Easy to Extend</h3>
+        <p>Clean modular code structure makes it simple to add new commands and workflows.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Stack -->
+  <section class="stack" id="stack">
+    <div class="section-label">Tech Stack</div>
+    <div class="section-title">Built with</div>
+    <div class="stack-pills">
+      <span class="pill">Node.js</span>
+      <span class="pill">JavaScript</span>
+      <span class="pill">whatsapp-web.js</span>
+      <span class="pill">Puppeteer</span>
+      <span class="pill">npm</span>
+      <span class="pill">GitHub</span>
+    </div>
+  </section>
+
+</div>
+
+<footer>
+  <p>
+    <a href="https://github.com/blindrusheroffical-wq/business-bot-whatsapp">business-bot-whatsapp</a>
+    · MIT License · Open Source
+  </p>
+  <p class="author-line">by Adam Eehan · Kerala, India 🇮🇳</p>
+</footer>
+
+</body>
+</html>
